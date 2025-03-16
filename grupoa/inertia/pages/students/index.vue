@@ -9,84 +9,338 @@
       </v-col>
     </v-row>
 
-    <v-card>
-      <v-data-table :headers="headers" :items="props.students" :loading="loading">
-        <template v-slot:item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" color="primary" class="mr-2"
-            @click="navigateTo('students.edit', { id: item.id })" />
-          <v-btn icon="mdi-delete" size="small" color="error" @click="confirmDelete(item)" />
-        </template>
-      </v-data-table>
+    <!-- Filtros e Busca -->
+    <v-card class="mb-4">
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="search"
+              label="Buscar por nome"
+              prepend-inner-icon="mdi-magnify"
+              variant="outlined"
+              density="compact"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="statusFilter"
+              :items="statusOptions"
+              label="Status"
+              variant="outlined"
+              density="compact"
+              hide-details
+            ></v-select>
+          </v-col>
+        </v-row>
+      </v-card-text>
     </v-card>
 
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="500px">
-      <v-card>
-        <v-card-title>Confirmar Exclusão</v-card-title>
-        <v-card-text>
-          Tem certeza que deseja excluir o aluno {{ selectedStudent?.name }}?
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" variant="text" @click="deleteDialog = false">Cancelar</v-btn>
-          <v-btn color="error" variant="text" @click="deleteStudent">Confirmar</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Tabela de Alunos -->
+    <v-card>
+      <v-data-table-server
+        v-model:items-per-page="itemsPerPage"
+        v-model:page="currentPage"
+        :headers="headers"
+        :items="props.students.data"
+        :loading="loading"
+        :items-length="totalItems"
+        :search="search"
+        @update:options="loadItems"
+        hover
+      >
+        <template v-slot:item.status="{ item }">
+          <v-chip
+            :color="item.deletedAt ? 'error' : 'success'"
+            size="small"
+            text-color="white"
+          >
+            {{ item.deletedAt ? 'Inativo' : 'Ativo' }}
+          </v-chip>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <div class="d-flex">
+            <v-tooltip text="Editar">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-pencil"
+                  size="small"
+                  color="primary"
+                  class="mr-2"
+                  v-bind="props"
+                  @click="navigateTo('students.edit', { id: item.id })"
+                  :disabled="!!item.deletedAt"
+                />
+              </template>
+            </v-tooltip>
+            <template v-if="!item.deletedAt">
+              <v-tooltip text="Desativar">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-delete"
+                    size="small"
+                    color="error"
+                    class="mr-2"
+                    v-bind="props"
+                    @click="confirmDelete(item)"
+                  />
+                </template>
+              </v-tooltip>
+            </template>
+            <template v-else>
+              <v-tooltip text="Restaurar">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-restore"
+                    size="small"
+                    color="info"
+                    class="mr-2"
+                    v-bind="props"
+                    @click="confirmRestore(item)"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Excluir permanentemente">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-delete-forever"
+                    size="small"
+                    color="error"
+                    v-bind="props"
+                    @click="confirmPermanentDelete(item)"
+                  />
+                </template>
+              </v-tooltip>
+            </template>
+          </div>
+        </template>
+      </v-data-table-server>
+    </v-card>
+
+    <!-- Diálogos de Confirmação -->
+    <ConfirmationDialog
+      v-model="confirmationDialog"
+      :title="dialogTitle"
+      :message="dialogMessage"
+      :confirm-text="dialogConfirmText"
+      :confirm-color="dialogConfirmColor"
+      @confirm="handleConfirm"
+    />
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, watchEffect } from 'vue'
 import { router } from '@inertiajs/vue3'
+import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog.vue'
+import _ from 'lodash'
 
-const loading = ref(false)
-const deleteDialog = ref(false)
-const selectedStudent = ref<Student | null>(null)
+interface DataTableHeader {
+  title: string;
+  key: string;
+  align?: 'start' | 'end' | 'center';
+  sortable?: boolean;
+  width?: number | string;
+  fixed?: boolean;
+  filterable?: boolean;
+  children?: DataTableHeader[];
+}
+
+const props = defineProps<{
+  students: {
+    data: Student[];
+    meta: {
+      total: number;
+      perPage: number;
+      currentPage: number;
+      lastPage: number;
+    };
+  };
+  filters: {
+    search?: string;
+    status?: string;
+  };
+}>();
 
 interface Student {
-  id: number
-  name: string
-  email: string
-  ra: string
-  cpf: string
+  id: number;
+  name: string;
+  email: string;
+  ra: string;
+  cpf: string;
+  deletedAt: string | null;
 }
 
-const props = defineProps<{ students: Student[] }>()
+// Estados reativos
+const confirmationDialog = ref(false)
+const dialogTitle = ref('')
+const dialogMessage = ref('')
+const dialogConfirmText = ref('Confirmar')
+const dialogConfirmColor = ref('primary')
+const currentAction = ref<'delete' | 'restore' | 'permanentDelete' | null>(null)
 
-const headers = [
-  { title: 'Nome', key: 'name' },
-  { title: 'Email', key: 'email' },
-  { title: 'RA', key: 'ra' },
-  { title: 'CPF', key: 'cpf' },
-  { title: 'Ações', key: 'actions', sortable: false }
-]
+const loading = ref(false);
+const selectedStudent = ref<Student | null>(null);
 
+// Estados da tabela
+const currentPage = ref(props.students.meta.currentPage);
+const itemsPerPage = ref(props.students.meta.perPage);
+const totalItems = ref(props.students.meta.total);
+const search = ref(props.filters.search || '');
+const statusFilter = ref(props.filters.status || 'active');
+const sortBy = ref<{ key: string; order: 'asc' | 'desc' }[]>([]);
+
+// Opções de status
+const statusOptions = [
+  { title: 'Ativos', value: 'active' },
+  { title: 'Inativos', value: 'inactive' },
+  { title: 'Todos', value: 'all' },
+];
+
+// Cabeçalhos da tabela
+const headers: DataTableHeader[] = [
+  { title: 'RA', key: 'ra', align: 'start', sortable: true },
+  { title: 'Nome', key: 'name', align: 'start', sortable: true },
+  { title: 'Email', key: 'email', align: 'start', sortable: true },
+  { title: 'CPF', key: 'cpf', align: 'start', sortable: true },
+  { title: 'Status', key: 'status', align: 'start', sortable: false },
+  { title: 'Ações', key: 'actions', align: 'start', sortable: false },
+];
+
+// Carrega os dados da tabela
+const loadItems = async (options: {
+  page: number;
+  itemsPerPage: number;
+  sortBy: { key: string; order: 'asc' | 'desc' }[];
+}) => {
+  loading.value = true;
+  try {
+    await router.get('/students', {
+      search: search.value,
+      status: statusFilter.value,
+      page: options.page,
+      perPage: options.itemsPerPage,
+      sortBy: options.sortBy?.length > 0 ? options.sortBy[0].key : null,
+      sortOrder: options.sortBy?.length > 0 ? options.sortBy[0].order : null,
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    });
+
+    // Atualiza o total de itens com base nos `props` atualizados
+    totalItems.value = props.students.meta.total;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Observa mudanças no total de itens
+watchEffect(() => {
+  totalItems.value = props.students.meta.total;
+});
+
+// Debounce para pesquisa
+watch(
+  () => search.value,
+  _.debounce(() => {
+    loadItems({
+      page: currentPage.value,
+      itemsPerPage: itemsPerPage.value,
+      sortBy: sortBy.value,
+    });
+  }, 300)
+);
+
+// Filtro de status
+watch(
+  () => statusFilter.value,
+  () => {
+    loadItems({
+      page: currentPage.value,
+      itemsPerPage: itemsPerPage.value,
+      sortBy: sortBy.value,
+    });
+  }
+);
+
+// Navegação
 const navigateTo = (routeName: string, params: Record<string, any> = {}) => {
   if (routeName === 'students.create') {
-    router.visit('/students/create')
+    router.visit('/students/create');
   } else if (routeName === 'students.edit') {
-    router.visit(`/students/${params.id}/edit`)
+    router.visit(`/students/${params.id}/edit`);
   }
-}
+};
 
-const confirmDelete = (student: Student) => {
+// Diálogos de confirmação
+const confirmDelete = (student : Student) => {
   selectedStudent.value = student
-  deleteDialog.value = true
+  currentAction.value = 'delete'
+  dialogTitle.value = 'Confirmar Desativação'
+  dialogMessage.value = `Tem certeza que deseja desativar o aluno ${student.name}?`
+  dialogConfirmText.value = 'Desativar'
+  dialogConfirmColor.value = 'error'
+  confirmationDialog.value = true
 }
 
-const deleteStudent = async () => {
-  if (!selectedStudent.value) return
+const confirmRestore = (student : Student) => {
+  selectedStudent.value = student
+  currentAction.value = 'restore'
+  dialogTitle.value = 'Confirmar Restauração'
+  dialogMessage.value = `Tem certeza que deseja restaurar o aluno ${student.name}?`
+  dialogConfirmText.value = 'Restaurar'
+  dialogConfirmColor.value = 'info'
+  confirmationDialog.value = true
+}
 
-  loading.value = true
+const confirmPermanentDelete = (student : Student) => {
+  selectedStudent.value = student
+  currentAction.value = 'permanentDelete'
+  dialogTitle.value = 'Confirmar Exclusão Permanente'
+  dialogMessage.value = `Tem certeza que deseja excluir permanentemente o aluno ${student.name}?`
+  dialogConfirmText.value = 'Excluir'
+  dialogConfirmColor.value = 'error'
+  confirmationDialog.value = true
+}
+
+const handleConfirm = async () => {
+  if (!selectedStudent.value) return;
+
   try {
-    await router.delete(`/students/${selectedStudent.value.id}`)
+    switch (currentAction.value) {
+      case 'delete':
+        await router.delete(`/students/${selectedStudent.value.id}`);
+        break;
+      case 'restore':
+        await router.post(`/students/${selectedStudent.value.id}/restore`);
+        break;
+      case 'permanentDelete':
+        await router.delete(`/students/${selectedStudent.value.id}/permanent-delete`);
+        break;
+    }
+
+    // Recarrega os dados da tabela após a exclusão
+    await router.get('/students', {
+      search: search.value,
+      status: statusFilter.value,
+      page: currentPage.value,
+      perPage: itemsPerPage.value,
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    });
+
+    // Atualiza o total de itens com base nos `props` atualizados
+    totalItems.value = props.students.meta.total;
   } catch (error) {
-    console.error('Erro ao excluir aluno:', error)
+    console.error('Erro ao processar a ação:', error);
   } finally {
-    loading.value = false
-    deleteDialog.value = false
-    selectedStudent.value = null
+    confirmationDialog.value = false;
+    selectedStudent.value = null;
+    currentAction.value = null;
   }
-}
+};
 </script>
