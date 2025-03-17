@@ -7,6 +7,7 @@ import type { DefineComponent } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 import vuetify from '../../plugins/vuetify'
+import DefaultLayout from '../layouts/default_layout.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
 
@@ -15,11 +16,15 @@ createInertiaApp({
 
   title: (title) => `${title} - ${appName}`,
 
-  resolve: (name) => {
-    return resolvePageComponent(
+  resolve: async (name) => {
+    const page = await resolvePageComponent(
       `../pages/${name}.vue`,
       import.meta.glob<DefineComponent>('../pages/**/*.vue'),
-    )
+    );
+
+    page.default.layout = page.default.layout || DefaultLayout;
+
+    return page;
   },
 
   setup({ el, App, props, plugin }) {
