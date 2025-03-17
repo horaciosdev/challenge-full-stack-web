@@ -158,9 +158,3 @@ onMounted(() => {
   console.log(props.inactiveStudents)
 })
 </script>
-
-<style scoped>
-.height-100 {
-  height: 100%;
-}
-</style>
