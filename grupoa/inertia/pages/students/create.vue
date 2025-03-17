@@ -15,19 +15,26 @@
                     <v-row>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.name" label="Nome Completo" :error-messages="errors.name"
-                                required></v-text-field>
+                                required
+                                @input="form.name.length > 0 ? errors.name = null : null"
+                                ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.email" label="Email" type="email" :error-messages="errors.email"
-                                required></v-text-field>
+                                required
+                                @input="form.email.length > 0 ? errors.email = null : null"
+                                ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.ra" label="RA (Registro Acadêmico)" :error-messages="errors.ra"
-                                required></v-text-field>
+                                required
+                                @input="form.ra.length > 0 ? errors.ra = null : null"
+                                ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.cpf" label="CPF" @input="handleCpfInput"
-                                :error-messages="errors.cpf" required></v-text-field>
+                                :error-messages="errors.cpf" required
+                                ></v-text-field>
                         </v-col>
                     </v-row>
 
@@ -52,6 +59,8 @@ import { cpfMask } from '../../../utils/mask_utils';
 const handleCpfInput = (event: Event) => {
     const input = event.target as HTMLInputElement;
     form.cpf = cpfMask(input.value);
+
+    form.cpf.length > 0 ? errors.value.cpf = null : null
 };
 
 const form = useForm({
@@ -75,6 +84,14 @@ const navigateToIndex = () => {
 
 const submitForm = async () => {
     loading.value = true
+
+    errors.value = {
+        name: null,
+        email: null,
+        ra: null,
+        cpf: null
+    }
+
     try {
         await form.post('/students', {
             onSuccess: () => {
