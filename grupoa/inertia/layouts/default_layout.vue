@@ -38,13 +38,13 @@
         <v-list-item
           v-for="item in menuItems"
           :key="item.title"
-          @click="navigateTo(item.route)"
+          @click="navigateTo(item.route); drawer = false"
           link
         >
-          <v-list-item-content class="d-flex gap-2 align-center">
+          <div class="d-flex gap-2 align-center">
             <v-icon>{{ item.icon }}</v-icon>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
+          </div>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -71,7 +71,7 @@
 import { ref } from "vue";
 import { router } from '@inertiajs/vue3';
 
-const drawer = ref(true);
+const drawer = ref(false);
 
 const menuItems = ref([
   { title: "Dashboard", icon: "mdi-view-dashboard", route: "/dashboard" },
