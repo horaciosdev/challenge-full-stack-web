@@ -17,4 +17,10 @@ vine.messagesProvider = new SimpleMessagesProvider({
   'ra.required': 'O RA é obrigatório',
   'cpf.required': 'O CPF é obrigatório',
   'cpf.regex': 'O CPF deve estar no formato 000.000.000-00',
+
+  // Password messages
+  'password.confirmed': 'As senhas não coincidem',
+  'password.minLength': 'A senha deve ter pelo menos {{ min }} caracteres',
+  'password.maxLength': 'A senha deve ter no máximo {{ max }} caracteres',
+  'password.regex': 'A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial'
 })

@@ -1,65 +1,50 @@
 import User from '#models/user'
 import { HttpContext } from '@adonisjs/core/http'
-import { errors } from '@adonisjs/auth'
+import { createUserValidator, loginValidator } from '#validators/user';
 
 export default class SessionController {
     async show({ inertia, auth }: HttpContext) {
         return inertia.render('auth/login', {
-          auth: {
-            user: auth.user,
-          },
+            auth: {
+                user: auth.user,
+            },
         });
-      }
+    }
 
     async showRegister({ inertia }: HttpContext) {
         return inertia.render('auth/register')
     }
 
-    async store({ request, auth, response, session }: HttpContext) {
-        const { email, password } = request.only(['email', 'password'])
+    public async store({ request, auth, response, inertia }: HttpContext) {
+        const payload = await request.validateUsing(loginValidator)
 
         try {
-            const user = await User.verifyCredentials(email, password)
+            const user = await User.verifyCredentials(payload.email, payload.password)
             await auth.use('web').login(user)
             return response.redirect('/dashboard')
         } catch (error) {
-            if (error instanceof errors.E_INVALID_CREDENTIALS) {
-                session.flash('errors', {
-                    email: 'Credenciais inválidas',
+            if (error.code === 'E_INVALID_CREDENTIALS') {
+                return inertia.render('auth/login', {
+                  errors: { credentials: 'Credenciais inválidas. Por favor, verifique seu email e senha.' }
                 })
-            } else {
-                session.flash('errors', {
-                    email: 'Ocorreu um erro durante o login',
-                })
-            }
+              }
 
-            return response.redirect().back()
+              return inertia.render('auth/login', {
+                errors: { default: 'Ocorreu um erro interno. Por favor, tente novamente mais tarde.' }
+              })
         }
     }
 
-    async register({ request, response, session }: HttpContext) {
-        const { fullName, email, password, passwordConfirmation } = request.only([
-            'fullName',
-            'email',
-            'password',
-            'passwordConfirmation',
-        ])
+    async register({ request, response }: HttpContext) {
+        const payload = await request.validateUsing(createUserValidator)
 
-        try {
-            await User.createWithPasswordConfirmation({
-                fullName,
-                email,
-                password,
-                passwordConfirmation,
-            })
+        await User.create({
+            fullName: payload.fullName,
+            email: payload.email,
+            password: payload.password,
+        })
 
-            return response.redirect('/login')
-        } catch (error) {
-            session.flash('errors', {
-                email: 'Erro ao registrar o usuário',
-            })
-            return response.redirect().back()
-        }
+        return response.redirect('/login')
     }
 
     async destroy({ auth, response }: HttpContext) {
