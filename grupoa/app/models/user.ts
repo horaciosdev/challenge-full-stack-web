@@ -27,4 +27,21 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+
+  static async createWithPasswordConfirmation(data: {
+    fullName: string
+    email: string
+    password: string
+    passwordConfirmation: string
+  }) {
+    if (data.password !== data.passwordConfirmation) {
+      throw new Error('As senhas não coincidem')
+    }
+
+    return await this.create({
+      fullName: data.fullName,
+      email: data.email,
+      password: data.password,
+    })
+  }
 }

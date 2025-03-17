@@ -59,8 +59,23 @@
             {{ item.deletedAt ? 'Inativo' : 'Ativo' }}
           </v-chip>
         </template>
+
         <template v-slot:item.actions="{ item }">
           <div class="d-flex">
+            <v-tooltip text="Visualizar">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-eye"
+                  size="small"
+                  color="info"
+                  class="mr-2"
+                  v-bind="props"
+                  @click="navigateTo('students.show', { id: item.id })"
+                  :disabled="!!item.deletedAt"
+                />
+              </template>
+            </v-tooltip>
+
             <v-tooltip text="Editar">
               <template v-slot:activator="{ props }">
                 <v-btn
@@ -74,6 +89,7 @@
                 />
               </template>
             </v-tooltip>
+
             <template v-if="!item.deletedAt">
               <v-tooltip text="Desativar">
                 <template v-slot:activator="{ props }">
@@ -172,7 +188,6 @@ interface Student {
   deletedAt: string | null;
 }
 
-// Estados reativos
 const confirmationDialog = ref(false)
 const dialogTitle = ref('')
 const dialogMessage = ref('')
@@ -183,7 +198,6 @@ const currentAction = ref<'delete' | 'restore' | 'permanentDelete' | null>(null)
 const loading = ref(false);
 const selectedStudent = ref<Student | null>(null);
 
-// Estados da tabela
 const currentPage = ref(props.students.meta.currentPage);
 const itemsPerPage = ref(props.students.meta.perPage);
 const totalItems = ref(props.students.meta.total);
@@ -191,14 +205,12 @@ const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || 'active');
 const sortBy = ref<{ key: string; order: 'asc' | 'desc' }[]>([]);
 
-// Opções de status
 const statusOptions = [
   { title: 'Ativos', value: 'active' },
   { title: 'Inativos', value: 'inactive' },
   { title: 'Todos', value: 'all' },
 ];
 
-// Cabeçalhos da tabela
 const headers: DataTableHeader[] = [
   { title: 'RA', key: 'ra', align: 'start', sortable: true },
   { title: 'Nome', key: 'name', align: 'start', sortable: true },
@@ -208,7 +220,6 @@ const headers: DataTableHeader[] = [
   { title: 'Ações', key: 'actions', align: 'start', sortable: false },
 ];
 
-// Carrega os dados da tabela
 const loadItems = async (options: {
   page: number;
   itemsPerPage: number;
@@ -236,12 +247,10 @@ const loadItems = async (options: {
   }
 };
 
-// Observa mudanças no total de itens
 watchEffect(() => {
   totalItems.value = props.students.meta.total;
 });
 
-// Debounce para pesquisa
 watch(
   () => search.value,
   _.debounce(() => {
@@ -253,7 +262,6 @@ watch(
   }, 300)
 );
 
-// Filtro de status
 watch(
   () => statusFilter.value,
   () => {
@@ -265,16 +273,16 @@ watch(
   }
 );
 
-// Navegação
 const navigateTo = (routeName: string, params: Record<string, any> = {}) => {
   if (routeName === 'students.create') {
     router.visit('/students/create');
   } else if (routeName === 'students.edit') {
     router.visit(`/students/${params.id}/edit`);
+  }else if (routeName === 'students.show') {
+    router.visit(`/students/${params.id}`);
   }
 };
 
-// Diálogos de confirmação
 const confirmDelete = (student : Student) => {
   selectedStudent.value = student
   currentAction.value = 'delete'

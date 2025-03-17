@@ -110,4 +110,26 @@ export default class StudentsController {
     return response.redirect().toRoute('students.index')
   }
 
+  public async dashboard({ inertia }: HttpContext) {
+    const totalStudents = await Student.query().apply((scopes) => scopes.withTrashed()).count('* as total')
+    const activeStudents = await Student.query().apply((scopes) => scopes.withoutTrashed()).count('* as active')
+    const inactiveStudents = await Student.query().apply((scopes) => scopes.onlyTrashed()).count('* as inactive')
+
+    const recentStudents = await Student.query().orderBy('created_at', 'desc').limit(5).then((students) =>
+      students.map((student) => ({
+        ...student.serialize(),
+        createdAt: student.createdAt.toFormat('dd/MM/yyyy'),
+        updatedAt: student.updatedAt.toFormat('dd/MM/yyyy'),
+        deletedAt: student.deletedAt?.toFormat('dd/MM/yyyy'),
+      }))
+    )
+
+    return inertia.render('dashboard', {
+      totalStudents: totalStudents[0].$extras.total,
+      activeStudents: activeStudents[0].$extras.active,
+      inactiveStudents: inactiveStudents[0].$extras.inactive,
+      recentStudents: recentStudents,
+    })
+  }
+
 }
