@@ -13,7 +13,6 @@
                     <v-icon
                         class="text-primary mb-4"
                         size="64"
-                        :class="{'opacity-75': $vuetify.theme.current.dark}"
                     >
                         mdi-school-outline
                     </v-icon>
