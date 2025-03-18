@@ -14,9 +14,13 @@ vine.messagesProvider = new SimpleMessagesProvider({
   'name.required': 'O nome é obrigatório',
   'email.required': 'O email é obrigatório',
   'email.email': 'O email deve ser um endereço válido',
+  'email.unique': 'Este email {{ value }} já está sendo utilizado',
   'ra.required': 'O RA é obrigatório',
+  'ra.existing': 'Este RA ja existe',
+  'ra.unique': 'O RA {{ value }} já está sendo utilizado',
   'cpf.required': 'O CPF é obrigatório',
   'cpf.regex': 'O CPF deve estar no formato 000.000.000-00',
+  'cpf.unique': 'O CPF {{ value }} já está sendo utilizado',
 
   // Password messages
   'password.confirmed': 'As senhas não coincidem',
