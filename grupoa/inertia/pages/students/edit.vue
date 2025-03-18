@@ -73,7 +73,9 @@ const props = defineProps<{ student: Student }>()
 
 const form = useForm({
     name: '',
-    email: ''
+    email: '',
+    ra: '',
+    cpf: ''
 })
 
 const loading = ref(false)
