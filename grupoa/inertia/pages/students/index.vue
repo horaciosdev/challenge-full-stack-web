@@ -160,7 +160,7 @@
         <v-btn
           color="white"
           variant="text"
-          @click="snackbar = false"
+          @click="snackbar.show = false"
         >
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -381,12 +381,6 @@ const handleConfirm = async () => {
         };
         break;
     }
-
-    await router.reload({
-      preserveScroll: true,
-      preserveState: true,
-      replace: true
-    })
 
     totalItems.value = props.students.meta.total;
   } catch (error) {
