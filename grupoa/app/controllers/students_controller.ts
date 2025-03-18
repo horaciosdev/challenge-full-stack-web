@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 import Student from "#models/student"
 import { createStudentValidator, updateStudentValidator } from '#validators/student'
+import { justNumbers } from '../../utils/string_utils.js'
 
 export default class StudentsController {
 
@@ -61,6 +62,11 @@ export default class StudentsController {
 
   public async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createStudentValidator)
+
+    if (payload.cpf) {
+      payload.cpf = justNumbers(payload.cpf)
+    }
+
     await Student.create(payload)
     return response.redirect().toRoute('students.index')
   }
