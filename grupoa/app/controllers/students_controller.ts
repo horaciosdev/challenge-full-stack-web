@@ -24,11 +24,11 @@ export default class StudentsController {
       query.where('name', 'ilike', `%${input.search}%`)
     }
 
-    query.orderBy('created_at', 'desc');
-
     // Ordenação
-    if (input.sortBy) {
-      query.orderBy(input.sortBy[0].key, input.sortBy[0].order)
+    if (input.sortBy && input.sortOrder) {
+      query.orderBy(input.sortBy, input.sortOrder)
+    }else{
+      query.orderBy('created_at', 'desc');
     }
 
     // Paginação
