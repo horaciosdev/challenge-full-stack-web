@@ -24,7 +24,7 @@ export default class StudentsController {
       query.where('name', 'ilike', `%${input.search}%`)
     }
 
-    query.orderBy('id', 'asc');
+    query.orderBy('created_at', 'desc');
 
     // Ordenação
     if (input.sortBy) {
@@ -36,8 +36,18 @@ export default class StudentsController {
     const perPage = input.perPage || 10
     const students = await query.paginate(page, perPage)
 
+    const formattedStudents = {
+      ...students.toJSON(),
+      data: students.toJSON().data.map((student) => ({
+        ...student.serialize(),
+        createdAt: student.createdAt.toFormat('dd/MM/yyyy'),
+        updatedAt: student.updatedAt.toFormat('dd/MM/yyyy'),
+        deletedAt: student.deletedAt?.toFormat('dd/MM/yyyy'),
+      })),
+    }
+
     return inertia.render('students/index', {
-      students,
+      students : formattedStudents,
       filters: {
         search: input.search,
         status: input.status

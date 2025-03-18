@@ -185,6 +185,8 @@ interface Student {
   email: string;
   ra: string;
   cpf: string;
+  createdAt: string;
+  updatedAt: string;
   deletedAt: string | null;
 }
 
@@ -202,13 +204,13 @@ const currentPage = ref(props.students.meta.currentPage);
 const itemsPerPage = ref(props.students.meta.perPage);
 const totalItems = ref(props.students.meta.total);
 const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || 'active');
+const statusFilter = ref(props.filters.status || 'all');
 const sortBy = ref<{ key: string; order: 'asc' | 'desc' }[]>([]);
 
 const statusOptions = [
+  { title: 'Todos', value: 'all' },
   { title: 'Ativos', value: 'active' },
   { title: 'Inativos', value: 'inactive' },
-  { title: 'Todos', value: 'all' },
 ];
 
 const headers: DataTableHeader[] = [
@@ -216,6 +218,8 @@ const headers: DataTableHeader[] = [
   { title: 'Nome', key: 'name', align: 'start', sortable: true },
   { title: 'Email', key: 'email', align: 'start', sortable: true },
   { title: 'CPF', key: 'cpf', align: 'start', sortable: true },
+  { title: 'Criado em', key: 'createdAt', align: 'start', sortable: true },
+  { title: 'Atualizado em', key: 'updatedAt', align: 'start', sortable: true },
   { title: 'Status', key: 'status', align: 'start', sortable: false },
   { title: 'Ações', key: 'actions', align: 'start', sortable: false },
 ];
