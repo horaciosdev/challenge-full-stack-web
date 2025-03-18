@@ -27,7 +27,6 @@ export const updateStudentValidator = vine.withMetaData<{ studentId: number }>()
       column: 'email',
       caseInsensitive: true,
       filter: (db, value, field) => {
-        console.log(field.meta)
         db.whereNot('id', field.meta.studentId);
       }
     }),
