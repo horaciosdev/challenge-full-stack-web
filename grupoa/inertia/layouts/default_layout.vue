@@ -8,7 +8,7 @@
       </v-app-bar-nav-icon>
       <v-toolbar-title>
         <span
-          @click="navigateTo('/')"
+          @click="$page.props.auth && $page.props.auth.user ? navigateTo('/dashboard') : navigateTo('/')"
           class="cursor-pointer"
         >
         Grupo A
@@ -86,7 +86,3 @@ const logout = () => {
   router.post('/logout')
 }
 </script>
-
-<style scoped>
-
-</style>
