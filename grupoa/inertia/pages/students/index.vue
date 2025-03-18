@@ -147,6 +147,25 @@
       :confirm-color="dialogConfirmColor"
       @confirm="handleConfirm"
     />
+
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      location="bottom center"
+      elevation="12"
+      :timeout="3000"
+    >
+      {{ snackbar.message }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -194,6 +213,12 @@ interface Student {
   updatedAt: string;
   deletedAt: string | null;
 }
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success',
+});
 
 const confirmationDialog = ref(false)
 const dialogTitle = ref('')
@@ -329,31 +354,45 @@ const handleConfirm = async () => {
     switch (currentAction.value) {
       case 'delete':
         await router.delete(`/students/${selectedStudent.value.id}`);
+        snackbar.value = {
+          show: true,
+          message: 'Aluno desativado com sucesso!',
+          color: 'success'
+        };
         break;
+
       case 'restore':
         await router.post(`/students/${selectedStudent.value.id}/restore`);
+        snackbar.value = {
+          show: true,
+          message: 'Aluno restaurado com sucesso!',
+          color: 'success'
+        };
         break;
+
       case 'permanentDelete':
         await router.delete(`/students/${selectedStudent.value.id}/permanent-delete`);
+        snackbar.value = {
+          show: true,
+          message: 'Aluno excluído permanentemente!',
+          color: 'success'
+        };
         break;
     }
 
-    // Recarrega os dados da tabela após a exclusão
-    await router.get('/students', {
-      search: search.value,
-      status: statusFilter.value,
-      page: currentPage.value,
-      perPage: itemsPerPage.value,
-    }, {
-      preserveState: true,
+    await router.reload({
       preserveScroll: true,
-      replace: true,
-    });
+      preserveState: true,
+      replace: true
+    })
 
-    // Atualiza o total de itens com base nos `props` atualizados
     totalItems.value = props.students.meta.total;
   } catch (error) {
-    console.error('Erro ao processar a ação:', error);
+    snackbar.value = {
+      show: true,
+      message: 'Erro ao executar a operação!',
+      color: 'error'
+    };
   } finally {
     confirmationDialog.value = false;
     selectedStudent.value = null;

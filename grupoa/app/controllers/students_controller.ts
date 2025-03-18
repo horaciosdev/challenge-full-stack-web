@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Student from "#models/student"
 import { createStudentValidator, updateStudentValidator } from '#validators/student'
 import { justNumbers } from '../../utils/string_utils.js'
+import router from '@adonisjs/core/services/router'
 
 export default class StudentsController {
 
@@ -99,15 +100,18 @@ export default class StudentsController {
     return response.redirect().toRoute('students.index')
   }
 
-  public async destroy({ params, response }: HttpContext) {
+  public async destroy({ params, response, request }: HttpContext) {
     const student = await Student.findOrFail(params.id)
 
     await student.softDelete()
 
-    return response.redirect().toRoute('students.index')
+    const queryParams = request.all()
+    return response.redirect().toPath(
+      router.makeUrl('students.index', {}, { qs: queryParams })
+    )
   }
 
-  public async forceDestroy({ params, response }: HttpContext) {
+  public async forceDestroy({ params, response, request }: HttpContext) {
     const student = await Student.query()
       .apply((scopes) => scopes.withTrashed())
       .where('id', params.id)
@@ -115,10 +119,13 @@ export default class StudentsController {
 
     await student.delete()
 
-    return response.redirect().toRoute('students.index')
+    const queryParams = request.all()
+    return response.redirect().toPath(
+      router.makeUrl('students.index', {}, { qs: queryParams })
+    )
   }
 
-  public async restore({ params, response }: HttpContext) {
+  public async restore({ params, response, request }: HttpContext) {
     const student = await Student.query()
       .apply((scopes) => scopes.onlyTrashed())
       .where('id', params.id)
@@ -126,7 +133,10 @@ export default class StudentsController {
 
     await student.restore()
 
-    return response.redirect().toRoute('students.index')
+    const queryParams = request.all()
+    return response.redirect().toPath(
+      router.makeUrl('students.index', {}, { qs: queryParams })
+    )
   }
 
   public async dashboard({ inertia }: HttpContext) {
