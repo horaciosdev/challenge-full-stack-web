@@ -1,5 +1,6 @@
 import { defineConfig } from '@adonisjs/inertia'
 import type { InferSharedProps } from '@adonisjs/inertia/types'
+import type { HttpContext } from '@adonisjs/core/http'
 
 const inertiaConfig = defineConfig({
   /**
@@ -11,7 +12,15 @@ const inertiaConfig = defineConfig({
    * Data that should be shared with all rendered pages
    */
   sharedData: {
-    // user: (ctx) => ctx.inertia.always(() => ctx.auth.user),
+    // Dados compartilhados globais
+    user: (ctx) => ctx.auth.user, // Exemplo: compartilhar o usuário autenticado
+    flash: async (ctx: HttpContext) => {
+      return {
+        success: ctx.session.flashMessages.get('success'),
+        error: ctx.session.flashMessages.get('error'),
+        // Adicione outros tipos de mensagens conforme necessário
+      }
+    },
   },
 
   /**

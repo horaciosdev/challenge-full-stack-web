@@ -65,7 +65,7 @@ export default class StudentsController {
     return inertia.render('students/create')
   }
 
-  public async store({ request, response }: HttpContext) {
+  public async store({ request, response, session }: HttpContext) {
     const payload = await request.validateUsing(createStudentValidator)
 
     if (payload.cpf) {
@@ -73,6 +73,8 @@ export default class StudentsController {
     }
 
     await Student.create(payload)
+
+    session.flash('success', 'Aluno criado com sucesso!');
 
     const originalQuery = request.qs()
     return response.redirect().toPath(
@@ -90,7 +92,7 @@ export default class StudentsController {
     return inertia.render('students/edit', { student })
   }
 
-  public async update({ params, request, response }: HttpContext) {
+  public async update({ params, request, response, session }: HttpContext) {
     const student = await Student.findOrFail(params.id)
 
     const payload = await request.validateUsing(updateStudentValidator, {
@@ -105,10 +107,9 @@ export default class StudentsController {
     student.merge(payload)
     await student.save()
 
+    session.flash('success', 'Aluno atualizado com sucesso!');
+
     const originalQuery = request.qs()
-
-
-    console.log('Parâmetros recebidos:', originalQuery)
 
     return response.redirect().toPath(
       router.makeUrl('students.index', {}, { qs: originalQuery })

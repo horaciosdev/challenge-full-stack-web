@@ -64,12 +64,15 @@
         © 2025 Grupo A
       </v-col>
     </v-footer>
+
+    <FlashMessages />
   </v-app>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { router } from '@inertiajs/vue3';
+import FlashMessages from '../components/FlashMessages.vue'
 
 const drawer = ref(false);
 
