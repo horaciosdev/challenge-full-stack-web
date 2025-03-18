@@ -154,7 +154,4 @@ const currentDate = new Date().toLocaleDateString('pt-BR', {
   day: 'numeric'
 })
 
-onMounted(() => {
-  console.log(props.inactiveStudents)
-})
 </script>
