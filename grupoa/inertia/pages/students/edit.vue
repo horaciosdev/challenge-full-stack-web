@@ -15,19 +15,26 @@
                     <v-row>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.name" label="Nome Completo" :error-messages="errors.name"
-                                required></v-text-field>
+                                required
+                                @input="form.name.length > 0 ? errors.name = null : null"
+                                ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.email" label="Email" type="email" :error-messages="errors.email"
-                                required></v-text-field>
+                                required
+                                @input="form.email.length > 0 ? errors.email = null : null"
+                                ></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.ra" label="RA (Registro Acadêmico)" :error-messages="errors.ra"
+                                readonly
                                 required></v-text-field>
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field v-model="form.cpf" label="CPF" @input="handleCpfInput"
-                                :error-messages="errors.cpf" required></v-text-field>
+                                :error-messages="errors.cpf"
+                                readonly
+                                required></v-text-field>
                         </v-col>
                     </v-row>
 
@@ -66,9 +73,7 @@ const props = defineProps<{ student: Student }>()
 
 const form = useForm({
     name: '',
-    email: '',
-    ra: '',
-    cpf: ''
+    email: ''
 })
 
 const loading = ref(false)
@@ -92,6 +97,14 @@ const navigateToIndex = () => {
 
 const submitForm = async () => {
     loading.value = true
+
+    errors.value = {
+        name: null,
+        email: null,
+        ra: null,
+        cpf: null
+    }
+
     try {
         await form.put(`/students/${props.student.id}`, {
             onSuccess: () => {

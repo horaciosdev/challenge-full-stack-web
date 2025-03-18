@@ -74,6 +74,9 @@ export default class StudentsController {
       }
     })
 
+    delete payload.ra
+    delete payload.cpf
+
     student.merge(payload)
     await student.save()
 

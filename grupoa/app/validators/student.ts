@@ -45,7 +45,7 @@ export const updateStudentValidator = vine.withMetaData<{ studentId: number }>()
         .where('ra', value)
         .first()
       return !exists
-    }),
+    }).optional(),
     cpf: vine.string().trim().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/).unique(async (db, value, field) => {
       const exists = await db
         .from('students')
@@ -53,6 +53,6 @@ export const updateStudentValidator = vine.withMetaData<{ studentId: number }>()
         .where('cpf', value)
         .first()
       return !exists
-    })
+    }).optional()
   })
 )
