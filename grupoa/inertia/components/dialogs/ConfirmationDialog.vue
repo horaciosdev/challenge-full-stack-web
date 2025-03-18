@@ -13,28 +13,26 @@
   </template>
 
   <script setup lang="ts">
-  import { defineProps, defineEmits } from 'vue'
-
-  const props = defineProps({
-    modelValue: Boolean, // Controla a visibilidade do diálogo
-    title: String, // Título do diálogo
-    message: String, // Mensagem de confirmação
-    confirmText: { type: String, default: 'Confirmar' }, // Texto do botão de confirmação
-    confirmColor: { type: String, default: 'primary' }, // Cor do botão de confirmação
+  defineProps({
+    modelValue: Boolean,
+    title: String,
+    message: String,
+    confirmText: { type: String, default: 'Confirmar' },
+    confirmColor: { type: String, default: 'primary' },
   })
 
   const emit = defineEmits(['update:modelValue', 'confirm'])
 
   const confirm = () => {
-    emit('confirm') // Emite o evento de confirmação
+    emit('confirm')
     close()
   }
 
   const close = () => {
-    emit('update:modelValue', false) // Fecha o diálogo
+    emit('update:modelValue', false)
   }
 
   const onUpdateModelValue = (value: boolean) => {
-    emit('update:modelValue', value) // Emite o evento para atualizar o valor
+    emit('update:modelValue', value)
   }
   </script>
