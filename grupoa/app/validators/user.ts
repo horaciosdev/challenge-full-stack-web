@@ -10,9 +10,10 @@ export const loginValidator = vine.compile(
 export const createUserValidator = vine.compile(
     vine.object({
         fullName: vine.string().trim().minLength(3),
-        email: vine.string().trim().email().unique(async (db, value) => {
-            const exists = await db.from('users').where('email', value).first()
-            return !exists
+        email: vine.string().trim().email().unique({
+            table: 'users',
+            column: 'email',
+            caseInsensitive: true
         }),
         password: vine.string().minLength(8).confirmed({ confirmationField: 'passwordConfirmation' }),
     })
