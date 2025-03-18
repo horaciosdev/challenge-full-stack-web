@@ -50,6 +50,10 @@
         @update:options="loadItems"
         hover
       >
+        <template v-slot:item.cpf="{ item }">
+          {{ cpfMask(item.cpf) }}
+        </template>
+
         <template v-slot:item.status="{ item }">
           <v-chip
             :color="item.deletedAt ? 'error' : 'success'"
@@ -150,6 +154,7 @@
 import { ref, watch, watchEffect } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog.vue'
+import { cpfMask } from '../../../utils/mask_utils';
 import _ from 'lodash'
 
 interface DataTableHeader {
