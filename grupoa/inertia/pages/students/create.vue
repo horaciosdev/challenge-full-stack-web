@@ -79,32 +79,35 @@ const errors = ref({
 })
 
 const navigateToIndex = () => {
-    router.visit('/students')
+  const currentQuery = new URLSearchParams(window.location.search)
+  router.visit(`/students?${currentQuery.toString()}`)
 }
 
 const submitForm = async () => {
-    loading.value = true
+  loading.value = true;
 
-    errors.value = {
-        name: null,
-        email: null,
-        ra: null,
-        cpf: null
-    }
+  const currentQuery = new URLSearchParams(window.location.search).toString();
 
-    try {
-        await form.post('/students', {
-            onSuccess: () => {
-                router.visit('/students')
-            },
-            onError: (err) => {
-                errors.value = Object.assign({}, errors.value, err)
-            }
-        })
-    } catch (error) {
-        console.error('Erro ao cadastrar aluno:', error)
-    } finally {
-        loading.value = false
-    }
-}
+  errors.value = {
+    name: null,
+    email: null,
+    ra: null,
+    cpf: null,
+  };
+
+  try {
+    await form.post(`/students?${currentQuery}`, {
+      onSuccess: () => {
+        // Não é necessário redirecionar manualmente, o Inertia já cuida disso
+      },
+      onError: (err) => {
+        errors.value = Object.assign({}, errors.value, err);
+      },
+    });
+  } catch (error) {
+    console.error('Erro ao cadastrar aluno:', error);
+  } finally {
+    loading.value = false;
+  }
+};
 </script>

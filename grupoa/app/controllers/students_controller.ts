@@ -52,7 +52,11 @@ export default class StudentsController {
       students : formattedStudents,
       filters: {
         search: input.search,
-        status: input.status
+        status: input.status,
+        page: input.page,
+        perPage: input.perPage,
+        sortBy: input.sortBy,
+        sortOrder: input.sortOrder
       }
     })
   }
@@ -69,7 +73,11 @@ export default class StudentsController {
     }
 
     await Student.create(payload)
-    return response.redirect().toRoute('students.index')
+
+    const originalQuery = request.qs()
+    return response.redirect().toPath(
+      router.makeUrl('students.index', {}, { qs: originalQuery })
+    )
   }
 
   public async show({ params, inertia }: HttpContext) {
@@ -97,7 +105,14 @@ export default class StudentsController {
     student.merge(payload)
     await student.save()
 
-    return response.redirect().toRoute('students.index')
+    const originalQuery = request.qs()
+
+
+    console.log('Parâmetros recebidos:', originalQuery)
+
+    return response.redirect().toPath(
+      router.makeUrl('students.index', {}, { qs: originalQuery })
+    )
   }
 
   public async destroy({ params, response, request }: HttpContext) {

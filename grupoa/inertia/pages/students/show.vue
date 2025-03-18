@@ -72,10 +72,12 @@ interface Student {
 const props = defineProps<{ student: Student }>()
 
 const navigateToIndex = () => {
-    router.visit('/students')
+  const currentQuery = new URLSearchParams(window.location.search)
+  router.visit(`/students?${currentQuery.toString()}`)
 }
 
 const navigateToEdit = () => {
-    router.visit(`/students/${props.student.id}/edit`)
+    const currentQuery = new URLSearchParams(window.location.search)
+    router.visit(`/students/${props.student.id}/edit?${currentQuery.toString()}`)
 }
 </script>

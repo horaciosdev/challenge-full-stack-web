@@ -308,14 +308,16 @@ watch(
 );
 
 const navigateTo = (routeName: string, params: Record<string, any> = {}) => {
+  const currentQuery = new URLSearchParams(window.location.search)
+
   if (routeName === 'students.create') {
-    router.visit('/students/create');
-  } else if (routeName === 'students.edit') {
-    router.visit(`/students/${params.id}/edit`);
-  }else if (routeName === 'students.show') {
-    router.visit(`/students/${params.id}`);
+    router.visit(`/students/create?${currentQuery.toString()}`)
+  } else if(routeName === 'students.edit') {
+    router.visit(`/students/${params.id}/edit?${currentQuery.toString()}`)
+  } else if(routeName === 'students.show') {
+    router.visit(`/students/${params.id}?${currentQuery.toString()}`)
   }
-};
+}
 
 const confirmDelete = (student : Student) => {
   selectedStudent.value = student

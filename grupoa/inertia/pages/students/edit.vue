@@ -92,32 +92,35 @@ onMounted(() => {
 })
 
 const navigateToIndex = () => {
-    router.visit('/students')
+  const currentQuery = new URLSearchParams(window.location.search)
+  router.visit(`/students?${currentQuery.toString()}`)
 }
 
 const submitForm = async () => {
-    loading.value = true
+  loading.value = true;
 
-    errors.value = {
-        name: null,
-        email: null,
-        ra: null,
-        cpf: null
-    }
+  const currentQuery = new URLSearchParams(window.location.search)
 
-    try {
-        await form.put(`/students/${props.student.id}`, {
-            onSuccess: () => {
-                router.visit('/students')
-            },
-            onError: (err) => {
-                errors.value = Object.assign({}, errors.value, err)
-            }
-        })
-    } catch (error) {
-        console.error('Erro ao atualizar aluno:', error)
-    } finally {
-        loading.value = false
-    }
-}
+  errors.value = {
+    name: null,
+    email: null,
+    ra: null,
+    cpf: null,
+  };
+
+  try {
+    await form.put(`/students/${props.student.id}?${currentQuery}`, {
+      onSuccess: () => {
+        // Não é necessário redirecionar manualmente, o Inertia já cuida disso
+      },
+      onError: (err) => {
+        errors.value = Object.assign({}, errors.value, err);
+      },
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar aluno:', error);
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
