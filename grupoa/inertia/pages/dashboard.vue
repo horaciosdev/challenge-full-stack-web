@@ -145,7 +145,7 @@ const props = defineProps<{
 const totalStudents = ref(Number(props.totalStudents) || 0)
 const activeStudents = ref(Number(props.activeStudents) || 0)
 const inactiveStudents = ref(Number(props.inactiveStudents) || 0)
-const recentStudents = ref(Number(props.recentStudents) || [])
+const recentStudents = ref(props.recentStudents || [])
 
 const currentDate = new Date().toLocaleDateString('pt-BR', {
   weekday: 'long',
