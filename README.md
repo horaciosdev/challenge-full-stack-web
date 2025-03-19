@@ -12,15 +12,15 @@
 - ✅ Gerenciador de pacotes `npm`.
 - ✅ Banco de dados PostgreSQL configurado localmente ou em nuvem.
   - 📌 Ajustar as configurações no arquivo `grupoa/.env`.
-- ✅ Arquivo `.env` configurado corretamente para desenvolvimento.
+- ✅ Arquivo `grupoa/.env` configurado corretamente para desenvolvimento.
   - 📌 Para mais detalhes, consulte o arquivo `/grupoa/.env`.
 
 ---
 
 ## 🏭 Como rodar com o Docker (ambiente de produção)
 
-1️⃣ **Verifique** se os dados do arquivo `.env` estão configurados para produção.
-   - 🔹 *Nota:* O arquivo `.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
+1️⃣ **Verifique** se os dados do arquivo `grupoa/.env` estão configurados para produção.
+   - 🔹 *Nota:* O arquivo `grupoa/.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
 
 2️⃣ **Execute os seguintes comandos:**
 
@@ -57,8 +57,8 @@ node ace db:seed --files=./database/seeders/main_seeder.ts
 
 ## 🛠️ Como rodar sem o Docker (ambiente de desenvolvimento)
 
-1️⃣ **Verifique** se os dados do arquivo `.env` estão configurados para desenvolvimento.
-   - 🔹 *Nota:* O arquivo `.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
+1️⃣ **Verifique** se os dados do arquivo `grupoa/.env` estão configurados para desenvolvimento.
+   - 🔹 *Nota:* O arquivo `grupoa/.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
 
 2️⃣ **Se ainda não estiver no diretório raiz do projeto, entre nele:**
 
