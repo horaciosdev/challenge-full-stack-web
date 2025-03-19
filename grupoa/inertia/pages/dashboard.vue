@@ -132,20 +132,20 @@
 
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import Student from '#models/student'
 
 const props = defineProps<{
   recentStudents?: Student[],
-  totalStudents?: number,
-  activeStudents?: number,
-  inactiveStudents?: number
+  totalStudents?: number | string,
+  activeStudents?: number | string,
+  inactiveStudents?: number | string
 }>()
 
-const totalStudents = ref(props.totalStudents || 0)
-const activeStudents = ref(props.activeStudents || 0)
-const inactiveStudents = ref(props.inactiveStudents || 0)
-const recentStudents = ref(props.recentStudents || [])
+const totalStudents = ref(Number(props.totalStudents) || 0)
+const activeStudents = ref(Number(props.activeStudents) || 0)
+const inactiveStudents = ref(Number(props.inactiveStudents) || 0)
+const recentStudents = ref(Number(props.recentStudents) || [])
 
 const currentDate = new Date().toLocaleDateString('pt-BR', {
   weekday: 'long',
