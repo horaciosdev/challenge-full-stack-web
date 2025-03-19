@@ -1,4 +1,6 @@
 <template>
+  <Head title="Alunos" />
+
   <v-container>
     <v-row class="mb-4">
       <v-col cols="12" class="d-flex justify-space-between align-center">
@@ -171,7 +173,7 @@
 
 <script setup lang="ts">
 import { ref, watch, watchEffect } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog.vue'
 import { cpfMask } from '../../../utils/mask_utils';
 import _ from 'lodash'

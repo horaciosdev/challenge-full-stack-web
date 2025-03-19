@@ -1,5 +1,5 @@
 <template>
-  <Head title="Dashboard | Grupo A" />
+  <Head title="Dashboard" />
 
   <v-container fluid>
     <!-- Cabeçalho -->

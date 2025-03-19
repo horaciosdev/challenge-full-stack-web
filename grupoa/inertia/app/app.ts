@@ -9,7 +9,7 @@ import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 import vuetify from '../../plugins/vuetify'
 import DefaultLayout from '../layouts/default_layout.vue';
 
-const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
+const appName = import.meta.env.VITE_APP_NAME || 'Grupo A'
 
 createInertiaApp({
   progress: { color: '#5468FF' },

@@ -1,4 +1,6 @@
 <template>
+    <Head title="Cadastro de Aluno" />
+
     <v-container>
         <v-row class="mb-4">
             <v-col cols="12" class="d-flex justify-space-between align-center">
@@ -53,7 +55,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { router, useForm } from '@inertiajs/vue3'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import { cpfMask } from '../../../utils/mask_utils';
 
 const handleCpfInput = (event: Event) => {

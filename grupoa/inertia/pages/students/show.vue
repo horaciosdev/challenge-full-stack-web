@@ -1,4 +1,6 @@
 <template>
+    <Head title="Aluno" />
+
     <v-container>
         <v-row class="mb-4">
             <v-col cols="12" class="d-flex justify-space-between align-center">
@@ -59,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 
 interface Student {
     id: number

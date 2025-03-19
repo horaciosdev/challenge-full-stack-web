@@ -1,4 +1,6 @@
 <template>
+    <Head title="Home" />
+
     <v-container class="fill-height" fluid>
       <v-row class="d-flex justify-center align-center">
         <v-col cols="12" sm="10" md="8" lg="6" xl="4" class="text-center">
@@ -53,7 +55,7 @@
 
   <script setup>
   import { ref, onMounted } from 'vue';
-  import { router } from '@inertiajs/vue3';
+  import { Head, router } from '@inertiajs/vue3';
 
   const showCard = ref(false);
 
