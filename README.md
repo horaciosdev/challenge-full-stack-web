@@ -1,127 +1,100 @@
-+A Educação - Full Stack Web Developer
-===================
+# 🚀 Como Executar o Projeto
 
-[![N|Solid](https://maisaedu.com.br/hubfs/site-grupo-a/logo-mais-a-educacao.svg)](https://maisaedu.com.br/)
+## 🔧 Pré-requisitos
 
-O objetivo deste desafio é avaliar as competências técnicas dos candidatos a desenvolvedor Full Stack Web na Maior Plataforma de Educação do Brasil.
+### 🐳 Para rodar com Docker (ambiente de "produção"):
+- ✅ Docker e Docker Compose instalados.
+- ✅ Arquivo `.env` do diretório `grupoa` configurado corretamente para produção.
+  - 📌 Para mais detalhes, consulte o arquivo `/grupoa/.env`.
 
-Será solicitado o desenvolvimento de uma Aplicação que realize a Matrícula do Aluno na Turma de Programação Web da instituição Edtech. Regras e requisitos técnicos estão detalhadas neste documento.
+### 💻 Para rodar sem Docker (ambiente de desenvolvimento):
+- ✅ Node.js instalado.
+- ✅ Gerenciador de pacotes `npm`.
+- ✅ Banco de dados PostgreSQL configurado localmente ou em nuvem.
+  - 📌 Ajustar as configurações no arquivo `grupoa/.env`.
+- ✅ Arquivo `.env` configurado corretamente para desenvolvimento.
+  - 📌 Para mais detalhes, consulte o arquivo `/grupoa/.env`.
 
-# Especificações Técnicas
-- **Front-end:**
-  - Framework JS: [Vue.js](https://vuejs.org/)
-  - Framework de UI: [Vuetify](https://vuetifyjs.com/)
-- **API:** NodeJS
-- **Banco de Dados:** Postgress ou MySQL
-- **Idioma de escrita do código:** Inglês
+---
 
-# Requisitos
-## Contextualização
-Considere que uma Instituição de Ensino Superior precisa de uma solução para cadastrar e gerenciar matrículas de alunos em turmas online. Para realizar a matrícula, é necessário que o cadastro do aluno tenha sido realizado.
+## 🏭 Como rodar com o Docker (ambiente de produção)
 
-O desafio consiste em criar uma aplicação para o cadastro de alunos conforme os critérios de aceitação.
+1️⃣ **Verifique** se os dados do arquivo `.env` estão configurados para produção.
+   - 🔹 *Nota:* O arquivo `.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
 
-## Mockups de interface
-A seguir, são apresentados alguns mockups de interface como um guia para a criação do front-end. Fique à vontade para usar sua criatividade na criação do front-end.
+2️⃣ **Execute os seguintes comandos:**
 
-* Listagem de Alunos
-![Listagem de Alunos](/mockups/studants_list.png)
+```sh
+docker compose up --build -d
+```
+   - 🛠️ *Explicação:* Inicia os contêineres do projeto em modo desacoplado (`-d`), reconstruindo a imagem se necessário (`--build`).
 
-* Criar/Editar Aluno
-![Listagem de Alunos](/mockups/studants_save.png)
+```sh
+docker exec -it app-grupoa sh
+```
+   - 🖥️ *Explicação:* Acessa o contêiner `app-grupoa`, permitindo rodar comandos dentro dele.
 
-## Histórias do Usuário
-- **Sendo** um usuário administrativo da Instituição
-- **Quero** gerenciar cadastros de alunos
-- **Para** que eu possa realizar a matrícula do aluno
+3️⃣ **Rode as migrações do banco de dados:**
 
-### Critérios de aceite:
+```sh
+node ace migration:run
+```
+   - 🗃️ *Explicação:* Aplica as migrações do banco de dados, criando as tabelas necessárias.
+   - 🔹 Quando solicitado, confirme a execução digitando **Y**.
 
-#### Cenário: Cadastrar novo aluno
-- **Dado** que estou na tela de Consulta de Alunos
-- **Quando** clico em Cadastrar Aluno
-- **Então** abre a tela de Cadastro do Aluno
-- **E** exibe os campos obrigatórios vazios
-####
-- **Dado** que inseri dados válidos nos campos
-- **Quando** clico em Salvar
-- **Então** cria o novo aluno na base
-- **E** retorna mensagem de sucesso
-####
-- **Dado** que inseri dados válidos nos campos
-- **Quando** clico em Cancelar
-- **Então** retorna para tela Consulta de Alunos
-- **E** não persiste a gravação dos dados no banco
+4️⃣ **Execute o seed do banco de dados:**
 
-#### Cenário: Listar alunos cadastrados
-- **Dado** que estou no Módulo Acadêmico
-- **Quando** clico no menu Alunos
-- **Então** abre a tela de Consulta de Alunos
-- **E** exibe opção Cadastrar Aluno ao topo
-- **E** lista dados dos alunos cadastrados
-- **E** exibe opção Editar por aluno
-- **E** exibe opção Excluir por aluno
+```sh
+node ace db:seed --files=./database/seeders/main_seeder.ts
+```
+   - 🌱 *Explicação:* Popula o banco de dados com dados iniciais para testes e funcionamento do sistema.
 
-#### Cenário: Editar cadastro de aluno
-- **Dado** que estou na listagem de alunos
-- **Quando** clico em Editar aluno
-- **Então** abre a tela de Cadastro do Aluno
-- **E** exibe os campos do cadastro preenchidos
-- **E** habilita alteração dos campos editáveis
-####
-- **Dado** que estou na tela de Cadastro do Aluno
-- **Quando** clica em Salvar
-- **Então** grava os dados editáveis na base
-####
-- **Dado** que estou na tela de Cadastro do Aluno
-- **Quando** clica em Cancelar
-- **Então** retorna para a tela de Consulta de Alunos
-- **E** não persiste a gravação dos dados
+5️⃣ **Acesse o projeto em:**
 
-#### Cenário: Excluir cadastro de aluno
-- **Dado** que estou na listagem de alunos
-- **Quando** clico em Excluir aluno
-- **Então** exibe a modal de confirmação de exclusão
-####
-- **Dado** que estou na modal de confirmação de exclusão
-- **Quando** clico em Confirmar
-- **Então** então exclui o registro do aluno
-####
-- **Dado** que estou na modal de confirmação de exclusão
-- **Quando** clico em Cancelar
-- **Então** então fecha a modal e não persiste a exclusão
+> 🔗 [http://localhost](http://localhost)
 
-## Campos obrigatórios:
-- **Nome** (editável)
-- **Email** (editável)
-- **RA** (não editável) (chave única)
-- **CPF** (não editável)
+---
 
-# Critérios de avaliação
-- Qualidade de escrita do código
-- Organização do projeto
-- Qualidade da API
-- Lógica da solução implementada
-- Qualidade da camada de persistência
-- Utilização do Git (quantidade e descrição dos commits, Git Flow, ...)
-- Validações
-- Tratamento de erros
-- Padrões de projeto e arquitetura
+## 🛠️ Como rodar sem o Docker (ambiente de desenvolvimento)
 
-# Desejável
-- Testes de unidade
-- Documentação da arquitetura de solução
+1️⃣ **Verifique** se os dados do arquivo `.env` estão configurados para desenvolvimento.
+   - 🔹 *Nota:* O arquivo `.env` foi removido do `.gitignore` para facilitar a execução do projeto durante a avaliação.
 
-# Diferenciais
-- Segurança da aplicação (autenticação, autorização, ...)
+2️⃣ **Se ainda não estiver no diretório raiz do projeto, entre nele:**
 
-# Instruções de entrega
-1. Crie um fork do repositório no seu GitHub
-2. Faça o push do código desenvolvido no seu Github
-3. Inclua um arquivo chamado COMMENTS.md explicando
-    - Decisão da arquitetura utilizada
-    - Lista de bibliotecas de terceiros utilizadas
-    - O que você melhoraria se tivesse mais tempo
-    - Quais requisitos obrigatórios que não foram entregues
-4. Informe ao recrutador quando concluir o desafio junto com o link do repositório
-5. Após revisão do projeto junto com a equipe de desevolvimento deixe seu repositório privado
+```sh
+cd <diretório_raiz>/grupoa
+```
+
+3️⃣ **Instale as dependências do projeto:**
+
+```sh
+npm install
+```
+
+4️⃣ **Configure um banco de dados:**
+   - 🔹 *Opções:*
+     - 🏠 Criar um banco PostgreSQL local.
+     - ☁️ Utilizar um serviço de banco de dados PostgreSQL na nuvem.
+     - ⚙️ Configurar corretamente a conexão no arquivo `.env`.
+
+5️⃣ **Rode as migrações do banco de dados:**
+
+```sh
+node ace migration:run
+```
+   - 🗃️ *Explicação:* Cria as tabelas necessárias no banco de dados configurado.
+
+6️⃣ **Execute o seed do banco de dados:**
+
+```sh
+node ace db:seed --files=./database/seeders/main_seeder.ts
+```
+   - 🌱 *Explicação:* Popula o banco de dados com dados iniciais para testes e desenvolvimento.
+
+7️⃣ **Execute o projeto:**
+
+```sh
+npm run dev
+```
+
