@@ -15,7 +15,8 @@ export const createStudentValidator = vine.compile(
     cpf: vine.string().trim().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/).unique({
       table: 'students',
       column: 'cpf'
-    })
+    }),
+    classIds: vine.array(vine.number()).optional()
   })
 )
 
@@ -43,6 +44,7 @@ export const updateStudentValidator = vine.withMetaData<{ studentId: number }>()
       filter: (db, _, field) => {
         db.whereNot('id', field.meta.studentId);
       }
-    }).optional()
+    }).optional(),
+    classIds: vine.array(vine.number()).optional()
   })
 )

@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeFind, beforeFetch, scope } from '@adonisjs/lucid/orm'
+import { BaseModel, column, beforeFind, beforeFetch, scope, manyToMany } from '@adonisjs/lucid/orm'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import Class from './class.js'
 
 export default class Student extends BaseModel {
   @column({ isPrimary: true })
@@ -26,6 +28,11 @@ export default class Student extends BaseModel {
 
   @column.dateTime()
   declare deletedAt: DateTime | null
+
+  @manyToMany(() => Class, {
+    pivotTable: 'students_classes',
+  })
+  declare classes: ManyToMany<typeof Class>
 
   // Implementando soft delete como um escopo
   @beforeFind()

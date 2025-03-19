@@ -54,6 +54,23 @@
                             </v-list-item>
                         </v-list>
                     </v-col>
+
+                    <!-- Exibir as turmas e escolas associadas -->
+                    <v-col cols="12" md="6">
+                        <h2 class="text-h6">Turmas</h2>
+                        <v-list v-if="student.classes.length">
+                            <v-list-item v-for="classItem in student.classes" :key="classItem.id">
+                                <template v-slot:prepend>
+                                    <v-icon color="primary" class="mr-2">mdi-school</v-icon>
+                                </template>
+                                <v-list-item-title>{{ classItem.name }}</v-list-item-title>
+                                <v-list-item-subtitle v-if="classItem.school">
+                                    Escola: {{ classItem.school.name }}
+                                </v-list-item-subtitle>
+                            </v-list-item>
+                        </v-list>
+                        <p v-else>Nenhuma turma cadastrada.</p>
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card>
@@ -63,19 +80,31 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 
+interface School {
+    id: number
+    name: string
+}
+
+interface Class {
+    id: number
+    name: string
+    school: School | null
+}
+
 interface Student {
     id: number
     name: string
     email: string
     ra: string
     cpf: string
+    classes: Class[]
 }
 
 const props = defineProps<{ student: Student }>()
 
 const navigateToIndex = () => {
-  const currentQuery = new URLSearchParams(window.location.search)
-  router.visit(`/students?${currentQuery.toString()}`)
+    const currentQuery = new URLSearchParams(window.location.search)
+    router.visit(`/students?${currentQuery.toString()}`)
 }
 
 const navigateToEdit = () => {

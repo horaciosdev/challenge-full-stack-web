@@ -38,6 +38,18 @@
                                 readonly
                                 required></v-text-field>
                         </v-col>
+                        <v-col cols="12">
+                            <v-select
+                                v-model="form.classIds"
+                                :items="classes"
+                                item-title="displayName"
+                                item-value="id"
+                                label="Turmas"
+                                multiple
+                                chips
+                                :error-messages="errors.classIds"
+                            ></v-select>
+                        </v-col>
                     </v-row>
 
                     <v-row>
@@ -71,13 +83,28 @@ interface Student {
     cpf: string
 }
 
-const props = defineProps<{ student: Student }>()
+interface Class {
+    id: number
+    name: string
+    displayName: string
+    school: {
+        id: number
+        name: string
+    }
+}
+
+const props = defineProps<{
+    student: Student
+    classes: Class[]
+    studentClassIds: number[]
+}>()
 
 const form = useForm({
     name: '',
     email: '',
     ra: '',
-    cpf: ''
+    cpf: '',
+    classIds: [] as number[]
 })
 
 const loading = ref(false)
@@ -85,14 +112,16 @@ const errors = ref({
     name: null as string[] | null,
     email: null as string[] | null,
     ra: null as string[] | null,
-    cpf: null as string[] | null
+    cpf: null as string[] | null,
+    classIds: null as string[] | null
 })
 
 onMounted(() => {
     form.name = props.student.name
     form.email = props.student.email
     form.ra = props.student.ra
-    form.cpf = cpfMask(props.student.cpf);
+    form.cpf = cpfMask(props.student.cpf)
+    form.classIds = props.studentClassIds
 })
 
 const navigateToIndex = () => {
@@ -110,6 +139,7 @@ const submitForm = async () => {
     email: null,
     ra: null,
     cpf: null,
+    classIds: null
   };
 
   try {

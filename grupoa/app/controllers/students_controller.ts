@@ -1,12 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-
-import Student from "#models/student"
+import Student from '#models/student'
+import Class from '#models/class'
 import { createStudentValidator, updateStudentValidator } from '#validators/student'
 import { justNumbers } from '../../utils/string_utils.js'
 import router from '@adonisjs/core/services/router'
 
 export default class StudentsController {
-
   public async index({ inertia, request }: HttpContext) {
     const input = request.all()
 
@@ -29,7 +28,7 @@ export default class StudentsController {
     // Ordenação
     if (input.sortBy && input.sortOrder) {
       query.orderBy(input.sortBy, input.sortOrder)
-    }else{
+    } else {
       query.orderBy('created_at', 'desc');
     }
 
@@ -49,7 +48,7 @@ export default class StudentsController {
     }
 
     return inertia.render('students/index', {
-      students : formattedStudents,
+      students: formattedStudents,
       filters: {
         search: input.search,
         status: input.status,
@@ -62,7 +61,8 @@ export default class StudentsController {
   }
 
   public async create({ inertia }: HttpContext) {
-    return inertia.render('students/create')
+    const classes = await Class.all()
+    return inertia.render('students/create', { classes })
   }
 
   public async store({ request, response, session }: HttpContext) {
@@ -72,7 +72,11 @@ export default class StudentsController {
       payload.cpf = justNumbers(payload.cpf)
     }
 
-    await Student.create(payload)
+    const student = await Student.create(payload)
+
+    if (payload.classIds) {
+      await student.related('classes').attach(payload.classIds)
+    }
 
     session.flash('success', 'Aluno criado com sucesso!');
 
@@ -83,13 +87,34 @@ export default class StudentsController {
   }
 
   public async show({ params, inertia }: HttpContext) {
-    const student = await Student.findOrFail(params.id)
+    const student = await Student.query()
+      .where('id', params.id)
+      .preload('classes', (query) => {
+        query.preload('school')
+      })
+      .firstOrFail()
+
     return inertia.render('students/show', { student })
   }
 
   public async edit({ params, inertia }: HttpContext) {
-    const student = await Student.findOrFail(params.id)
-    return inertia.render('students/edit', { student })
+    const student = await Student.query()
+      .where('id', params.id)
+      .preload('classes', (query) => {
+        query.preload('school')
+      })
+      .firstOrFail()
+
+    const classes = await Class.query().preload('school').orderBy('name', 'asc')
+
+    return inertia.render('students/edit', {
+      student,
+      classes: classes.map((c) => ({
+        ...c.serialize(),
+        displayName: `${c.name} - ${c.school.name}`
+      })),
+      studentClassIds: student.classes.map((c) => c.id),
+    })
   }
 
   public async update({ params, request, response, session }: HttpContext) {
@@ -101,19 +126,22 @@ export default class StudentsController {
       }
     })
 
-    delete payload.ra
-    delete payload.cpf
+    const { classIds, ...studentData } = payload
 
-    student.merge(payload)
+    delete studentData.ra
+    delete studentData.cpf
+
+    student.merge(studentData)
     await student.save()
 
-    session.flash('success', 'Aluno atualizado com sucesso!');
+    if (classIds && Array.isArray(classIds)) {
+      await student.related('classes').sync(classIds)
+    }
+
+    session.flash('success', 'Aluno atualizado com sucesso!')
 
     const originalQuery = request.qs()
-
-    return response.redirect().toPath(
-      router.makeUrl('students.index', {}, { qs: originalQuery })
-    )
+    return response.redirect().toPath(router.makeUrl('students.index', {}, { qs: originalQuery }))
   }
 
   public async destroy({ params, response, request }: HttpContext) {
@@ -156,18 +184,27 @@ export default class StudentsController {
   }
 
   public async dashboard({ inertia }: HttpContext) {
-    const totalStudents = await Student.query().apply((scopes) => scopes.withTrashed()).count('* as total')
-    const activeStudents = await Student.query().apply((scopes) => scopes.withoutTrashed()).count('* as active')
-    const inactiveStudents = await Student.query().apply((scopes) => scopes.onlyTrashed()).count('* as inactive')
+    const totalStudents = await Student.query()
+      .apply((scopes) => scopes.withTrashed())
+      .count('* as total')
+    const activeStudents = await Student.query()
+      .apply((scopes) => scopes.withoutTrashed())
+      .count('* as active')
+    const inactiveStudents = await Student.query()
+      .apply((scopes) => scopes.onlyTrashed())
+      .count('* as inactive')
 
-    const recentStudents = await Student.query().orderBy('created_at', 'desc').limit(5).then((students) =>
-      students.map((student) => ({
-        ...student.serialize(),
-        createdAt: student.createdAt.toFormat('dd/MM/yyyy'),
-        updatedAt: student.updatedAt.toFormat('dd/MM/yyyy'),
-        deletedAt: student.deletedAt?.toFormat('dd/MM/yyyy'),
-      }))
-    )
+    const recentStudents = await Student.query()
+      .orderBy('created_at', 'desc')
+      .limit(5)
+      .then((students) =>
+        students.map((student) => ({
+          ...student.serialize(),
+          createdAt: student.createdAt.toFormat('dd/MM/yyyy'),
+          updatedAt: student.updatedAt.toFormat('dd/MM/yyyy'),
+          deletedAt: student.deletedAt?.toFormat('dd/MM/yyyy'),
+        }))
+      )
 
     return inertia.render('dashboard', {
       totalStudents: totalStudents[0].$extras.total,
@@ -176,5 +213,4 @@ export default class StudentsController {
       recentStudents: recentStudents,
     })
   }
-
 }
