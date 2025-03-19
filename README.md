@@ -63,7 +63,7 @@ node ace db:seed --files=./database/seeders/main_seeder.ts
 2️⃣ **Se ainda não estiver no diretório raiz do projeto, entre nele:**
 
 ```sh
-cd <diretório_raiz>/grupoa
+cd grupoa
 ```
 
 3️⃣ **Instale as dependências do projeto:**
@@ -76,7 +76,7 @@ npm install
    - 🔹 *Opções:*
      - 🏠 Criar um banco PostgreSQL local.
      - ☁️ Utilizar um serviço de banco de dados PostgreSQL na nuvem.
-     - ⚙️ Configurar corretamente a conexão no arquivo `.env`.
+     - ⚙️ Configurar corretamente a conexão no arquivo `grupoa/.env`.
 
 5️⃣ **Rode as migrações do banco de dados:**
 
